@@ -46,7 +46,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
 
 class main {
     public static void main(String[] args) {
-        String file = "/home/rick/Documenti/Università/Unibo/Programmazione Concorrente e Distribuita/Lab/assignment-01/src/main/java/pcd/ass01/controller/BoidsSimulator.java";
+        String file = "/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main/src/main/java/it/unibo/puzbob/controller/GameLoop.java";
         DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
         lib.getClassDependencies(file)
                 .future().onComplete(result -> {

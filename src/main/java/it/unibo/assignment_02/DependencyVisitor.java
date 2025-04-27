@@ -20,6 +20,8 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
      */			
     public void visit(ClassOrInterfaceDeclaration n, Object arg) {
         super.visit(n, arg);
+        n.getExtendedTypes().forEach(e -> set.add(e.toString()));
+        n.getImplementedTypes().forEach(e -> set.add(e.toString()));
     }
     
     /**
@@ -72,12 +74,19 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
         return set.stream()
                 .map(e -> e.substring(e.lastIndexOf('.') + 1))
                 .flatMap(e -> {
-                    if (!e.contains("<"))
-                        return Stream.of(e);
-                    else
+                    if (e.contains("<"))
                         return Stream.of(e.split("<|>"));
+                    else
+                        return Stream.of(e);
                 })
-                .filter(e -> !primitive.contains(e))
+                .flatMap(e -> {
+                    if (e.contains(","))
+                        return Stream.of(e.split(","));
+                    else
+                        return Stream.of(e);
+                })
+                .map(e -> e.replace(" ","").replace("[","").replace("]",""))
+                .filter(e -> !primitive.contains(e) && !e.isEmpty())
                 .collect(java.util.stream.Collectors.toSet());
     }
     
