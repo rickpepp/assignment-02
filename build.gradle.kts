@@ -32,6 +32,7 @@ dependencies {
     implementation("io.vertx:vertx-core")
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.26.4")
     implementation("org.jgrapht:jgrapht-core:1.5.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 }

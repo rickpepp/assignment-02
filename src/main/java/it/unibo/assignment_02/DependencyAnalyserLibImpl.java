@@ -1,5 +1,8 @@
 package it.unibo.assignment_02;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.vertx.core.CompositeFuture;
@@ -13,6 +16,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -109,5 +113,15 @@ class main {
         }).onFailure(result -> {
             System.out.println(result.toString());
         });
+        /*try(InputStream in= Thread.currentThread().getContextClassLoader().getResourceAsStream("ExcludeDependencyFile.json")){
+//pass InputStream to JSON-Library, e.g. using Jackson
+            ObjectMapper mapper = new ObjectMapper();
+            List<String> ciao = mapper.readValue(in, new TypeReference<List<String>>(){});
+            System.out.println(ciao.toString());
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }*/
+       ;
     }
 }
