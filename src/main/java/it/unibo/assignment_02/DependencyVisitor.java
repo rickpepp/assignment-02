@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 
 public class DependencyVisitor extends VoidVisitorAdapter<Object> {
 
-    Set<String> set = new java.util.HashSet<String>();
+    private Set<String> set = new java.util.HashSet<String>();
+    private String className = "";
     
     /**
      *  Finding a type in a class/interface declaration 
@@ -22,6 +23,7 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
         super.visit(n, arg);
         n.getExtendedTypes().forEach(e -> set.add(e.toString()));
         n.getImplementedTypes().forEach(e -> set.add(e.toString()));
+        this.className = n.getNameAsString();
     }
     
     /**
@@ -88,6 +90,10 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
                 .map(e -> e.replace(" ","").replace("[","").replace("]",""))
                 .filter(e -> !primitive.contains(e) && !e.isEmpty())
                 .collect(java.util.stream.Collectors.toSet());
+    }
+
+    public String getClassName() {
+        return this.className;
     }
     
 }

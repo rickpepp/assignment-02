@@ -11,6 +11,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,11 +33,11 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
                     DependencyVisitor dv =  new DependencyVisitor();
                     dv.visit(cu,null);
                     Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-                    g.addVertex("base");
+                    g.addVertex(dv.getClassName());
                     Set<String> imports = dv.getSet();
                     for (String importDeclaration : imports) {
                         g.addVertex(importDeclaration);
-                        g.addEdge("base", importDeclaration);
+                        g.addEdge(dv.getClassName(), importDeclaration);
                     }
                     promise.complete(new ClassDepsReport(g));
                 }).onFailure(promise::fail).onComplete(ar -> vx.close());
@@ -49,7 +50,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
         Promise<PackageDepsReport> promise = Promise.promise();
         Promise<Collection<String>> promisResult = (Promise<Collection<String>>) vx.executeBlocking(filePromise -> {
             try (Stream<Path> stream = Files.walk(Paths.get(packagePath))) {
-                filePromise.complete(stream.filter(Files::isRegularFile).map(e -> e.toFile().getAbsolutePath()).collect(Collectors.toSet()));
+                filePromise.complete(stream.filter(e -> Files.isRegularFile(e) && e.getFileName().toString().endsWith(".java")).map(e -> e.toFile().getAbsolutePath()).collect(Collectors.toSet()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -61,24 +62,21 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
                 ClassDepsReport r = totalresult.stream().reduce((a, b) -> {
                     Graphs.addGraph(a.getDependencies(),b.getDependencies());
                     return a;
-                }).get()    ;
-
+                }).get();
                 promise.complete(new PackageDepsReport(r.getDependencies()));
-
             });
         });
-        /*promisResult.future().onComplete(e -> {
-            Future.all(e.result().stream().map(this::getClassDependencies).map(Promise::future).collect(Collectors.toList()))
-                    .onSuccess(result -> {
-                        result.result().list().forEach(System.out::println);
-                    });
-        });*/
         return promise;
     }
 
     @Override
-    public Promise<ProjectDepsReport> getProjectDependencies() {
-        return null;
+    public Promise<ProjectDepsReport> getProjectDependencies(String projectPath) {
+        Vertx vx = Vertx.vertx();
+        Promise<ProjectDepsReport> promise = Promise.promise();
+        this.getPackageDependencies(projectPath + File.separator + "src").future().onComplete(
+                packageDepsReportAsyncResult -> promise.complete(new ProjectDepsReport(packageDepsReportAsyncResult.result().getDependencies()))
+        );
+        return promise;
     }
 }
 
@@ -94,7 +92,7 @@ class main {
         }).onFailure(result -> {
             System.out.println(result.toString());
         });*/
-        DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
+        /*DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
         lib.getPackageDependencies("/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main/src/main/java/it/unibo/puzbob/controller/")
                 .future().onComplete(result -> {
                     for(DefaultEdge e : result.result().getDependencies().edgeSet()){
@@ -102,6 +100,14 @@ class main {
                     }
                 }).onFailure(result -> {
                     System.out.println(result.toString());
-                });
+                });*/
+        DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
+        lib.getProjectDependencies("/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main").future().onComplete(result -> {
+            for(DefaultEdge e : result.result().getDependencies().edgeSet()){
+                System.out.println(result.result().getDependencies().getEdgeSource(e) + " --> " + result.result().getDependencies().getEdgeTarget(e));
+            }
+        }).onFailure(result -> {
+            System.out.println(result.toString());
+        });
     }
 }
