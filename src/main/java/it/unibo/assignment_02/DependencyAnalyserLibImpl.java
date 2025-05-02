@@ -1,8 +1,5 @@
 package it.unibo.assignment_02;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.vertx.core.CompositeFuture;
@@ -16,7 +13,6 @@ import org.jgrapht.graph.DefaultEdge;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,8 +25,14 @@ import java.util.stream.Stream;
 public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
     @Override
     public Promise<ClassDepsReport> getClassDependencies(String filePath) {
-        Vertx vx = Vertx.currentContext().owner();
+        Vertx vx;
+        try {
+            vx = Vertx.currentContext().owner();
+        } catch (NullPointerException e) {
+            vx = Vertx.vertx();
+        }
         Promise<ClassDepsReport> promise = Promise.promise();
+        Vertx finalVx = vx;
         vx.fileSystem().readFile(filePath)
                 .onComplete(buffer -> {
                     CompilationUnit cu = StaticJavaParser.parse(buffer.result().toString());
@@ -44,7 +46,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
                         g.addEdge(dv.getClassName(), importDeclaration);
                     }
                     promise.complete(new ClassDepsReport(g));
-                }).onFailure(promise::fail).onComplete(ar -> vx.close());
+                }).onFailure(promise::fail).onComplete(ar -> finalVx.close());
         return promise;
     }
 
@@ -77,7 +79,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
     public Promise<ProjectDepsReport> getProjectDependencies(String projectPath) {
         Vertx vx = Vertx.vertx();
         Promise<ProjectDepsReport> promise = Promise.promise();
-        this.getPackageDependencies(projectPath + File.separator + "src").future().onComplete(
+        this.getPackageDependencies(projectPath + File.separator + "src" + File.separator + "main" + File.separator + "java").future().onComplete(
                 packageDepsReportAsyncResult -> promise.complete(new ProjectDepsReport(packageDepsReportAsyncResult.result().getDependencies()))
         );
         return promise;
@@ -86,7 +88,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
 
 class main {
     public static void main(String[] args) {
-        /*String file = "/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main/src/main/java/it/unibo/puzbob/controller/GameLoop.java";
+        String file = "/home/rick/Documenti/Università/Unibo/Paradigmi e Sviluppo del software/Lab/pps-lab01b/src/main/java/e1/OverDraftDecorator.java";
         DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
         lib.getClassDependencies(file)
                 .future().onComplete(result -> {
@@ -95,7 +97,7 @@ class main {
             }
         }).onFailure(result -> {
             System.out.println(result.toString());
-        });*/
+        });
         /*DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
         lib.getPackageDependencies("/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main/src/main/java/it/unibo/puzbob/controller/")
                 .future().onComplete(result -> {
@@ -105,23 +107,13 @@ class main {
                 }).onFailure(result -> {
                     System.out.println(result.toString());
                 });*/
-        DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
-        lib.getProjectDependencies("/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main").future().onComplete(result -> {
+        /*DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
+        lib.getProjectDependencies("/home/rick/Documenti/Università/Unibo/Paradigmi e Sviluppo del software/Lab/pps-lab01b").future().onComplete(result -> {
             for(DefaultEdge e : result.result().getDependencies().edgeSet()){
                 System.out.println(result.result().getDependencies().getEdgeSource(e) + " --> " + result.result().getDependencies().getEdgeTarget(e));
             }
         }).onFailure(result -> {
             System.out.println(result.toString());
-        });
-        /*try(InputStream in= Thread.currentThread().getContextClassLoader().getResourceAsStream("ExcludeDependencyFile.json")){
-//pass InputStream to JSON-Library, e.g. using Jackson
-            ObjectMapper mapper = new ObjectMapper();
-            List<String> ciao = mapper.readValue(in, new TypeReference<List<String>>(){});
-            System.out.println(ciao.toString());
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }*/
-       ;
+        });*/
     }
 }

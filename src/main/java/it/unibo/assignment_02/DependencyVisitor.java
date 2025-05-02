@@ -29,6 +29,7 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
         super.visit(n, arg);
         n.getExtendedTypes().forEach(e -> dependencySet.add(e.toString()));
         n.getImplementedTypes().forEach(e -> dependencySet.add(e.toString()));
+        n.getConstructors().forEach(e -> e.getParameters().forEach(p -> dependencySet.add(p.getTypeAsString())));
         for (TypeParameter typeParameter : n.getTypeParameters()) {
             this.genericsSet.add(typeParameter.getNameAsString());
         }
