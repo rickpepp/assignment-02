@@ -1,0 +1,66 @@
+{
+  "vertices": [
+    "OverDraftDecorator",
+    "BaseDecoratorBankAccount",
+    "BankAccount",
+    "IllegalStateException",
+    "BankAccountFactory",
+    "WithdrawFunctionFeeDecorator",
+    "CoreBankAccount",
+    "Function"
+  ],
+  "edges": [
+    {
+      "source": "BankAccountFactory",
+      "target": "BankAccount"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "WithdrawFunctionFeeDecorator"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "OverDraftDecorator"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "CoreBankAccount"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "BaseDecoratorBankAccount",
+      "target": "BankAccount"
+    },
+    {
+      "source": "CoreBankAccount",
+      "target": "BankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "BankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "IllegalStateException"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "Function"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "BankAccount"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 package it.unibo.assignment_02;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -10,8 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,14 +33,7 @@ class DependencyAnalyserLibImplTest {
         testContext.assertComplete( lib.getClassDependencies(absolutePath + "/pps-lab01b/src/main/java/e1/OverDraftDecorator.java").future() )
                 .onComplete(classDepsReportAsyncResult ->
                         testContext.verify(() -> {
-                            Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-                            g.addVertex("OverDraftDecorator");
-                            g.addVertex("BaseDecoratorBankAccount");
-                            g.addVertex("BankAccount");
-                            g.addVertex("IllegalStateException");
-                            g.addEdge("OverDraftDecorator", "BaseDecoratorBankAccount");
-                            g.addEdge("OverDraftDecorator", "BankAccount");
-                            g.addEdge("OverDraftDecorator", "IllegalStateException");
+                            Graph<String, DefaultEdge> g = createGraphFromJson("ClassGraphResultExpected.json");
                             assertEquals(getStringFromGraph(classDepsReportAsyncResult.result().getDependencies()), getStringFromGraph(g));
                             testContext.completeNow();
                         }));
@@ -49,28 +48,7 @@ class DependencyAnalyserLibImplTest {
         testContext.assertComplete( lib.getPackageDependencies(absolutePath + "/pps-lab01b/src/main/java/e1").future() )
                 .onComplete(packageDepsReportAsyncResult ->
                         testContext.verify(() -> {
-                            Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-                            g.addVertex("OverDraftDecorator");
-                            g.addVertex("BaseDecoratorBankAccount");
-                            g.addVertex("BankAccount");
-                            g.addVertex("IllegalStateException");
-                            g.addVertex("BankAccountFactory");
-                            g.addVertex("WithdrawFunctionFeeDecorator");
-                            g.addVertex("CoreBankAccount");
-                            g.addVertex("Function");
-                            g.addEdge("BankAccountFactory", "BankAccount");
-                            g.addEdge("BankAccountFactory", "WithdrawFunctionFeeDecorator");
-                            g.addEdge("BankAccountFactory", "OverDraftDecorator");
-                            g.addEdge("BankAccountFactory", "CoreBankAccount");
-                            g.addEdge("BankAccountFactory", "BaseDecoratorBankAccount");
-                            g.addEdge("BaseDecoratorBankAccount", "BankAccount");
-                            g.addEdge("CoreBankAccount", "BankAccount");
-                            g.addEdge("OverDraftDecorator", "BaseDecoratorBankAccount");
-                            g.addEdge("OverDraftDecorator", "BankAccount");
-                            g.addEdge("OverDraftDecorator", "IllegalStateException");
-                            g.addEdge("WithdrawFunctionFeeDecorator", "BaseDecoratorBankAccount");
-                            g.addEdge("WithdrawFunctionFeeDecorator", "Function");
-                            g.addEdge("WithdrawFunctionFeeDecorator", "BankAccount");
+                            Graph<String, DefaultEdge> g = createGraphFromJson("PackageGraphResultExpected.json");
                             assertEquals(getStringFromGraph(packageDepsReportAsyncResult.result().getDependencies()), getStringFromGraph(g));
                             testContext.completeNow();
                         }));
@@ -78,6 +56,23 @@ class DependencyAnalyserLibImplTest {
 
     @Test
     void getProjectDependencies() {
+    }
+
+    private Graph<String, DefaultEdge> createGraphFromJson(String jsonPath) throws IOException {
+        InputStream in= Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream(jsonPath);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> jsonMap = objectMapper.readValue(in, Map.class);
+        List<String> vertices = (List<String>) jsonMap.get("vertices");
+        List<Map<String, String>> edges = (List<Map<String, String>>) jsonMap.get("edges");
+        Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+        for (String vertex: vertices) {
+            g.addVertex(vertex);
+        }
+        for (Map<String, String> edge : edges) {
+            g.addEdge(edge.get("source"), edge.get("target"));
+        }
+        return g;
     }
 
     private String getStringFromGraph(Graph<String, DefaultEdge> graph) {

@@ -1,0 +1,22 @@
+{
+  "vertices": [
+    "OverDraftDecorator",
+    "BaseDecoratorBankAccount",
+    "BankAccount",
+    "IllegalStateException"
+  ],
+  "edges": [
+    {
+      "source": "OverDraftDecorator",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "BankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "IllegalStateException"
+    }
+  ]
+}
