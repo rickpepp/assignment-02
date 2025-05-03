@@ -1,7 +1,5 @@
 package it.unibo.assignment_02;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
@@ -55,7 +53,18 @@ class DependencyAnalyserLibImplTest {
     }
 
     @Test
-    void getProjectDependencies() {
+    void getProjectDependencies(Vertx vertx, VertxTestContext testContext) {
+        DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
+        String path = "src/test/resources";
+        File file = new File(path);
+        String absolutePath = file.getAbsolutePath();
+        testContext.assertComplete( lib.getProjectDependencies(absolutePath + "/pps-lab01b").future() )
+                .onComplete(projectDepsReportAsyncResult ->
+                        testContext.verify(() -> {
+                            Graph<String, DefaultEdge> g = createGraphFromJson("ProjectGraphResultExpected.json");
+                            assertEquals(getStringFromGraph(g), getStringFromGraph(projectDepsReportAsyncResult.result().getDependencies()));
+                            testContext.completeNow();
+                        }));
     }
 
     private Graph<String, DefaultEdge> createGraphFromJson(String jsonPath) throws IOException {

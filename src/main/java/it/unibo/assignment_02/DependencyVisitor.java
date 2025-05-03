@@ -108,7 +108,7 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
                 .map(e -> e.replace(" ","")
                         .replace("[","")
                         .replace("]",""))
-                .filter(e -> !primitive.contains(e) && !e.isEmpty() && !this.genericsSet.contains(e))
+                .filter(e -> !primitive.contains(e) && !e.isEmpty() && !this.genericsSet.contains(e) && !e.equals(this.className))
                 .collect(java.util.stream.Collectors.toSet());
     }
 

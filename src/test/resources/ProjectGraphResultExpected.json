@@ -1,0 +1,251 @@
+{
+  "vertices": [
+    "OverDraftDecorator",
+    "BaseDecoratorBankAccount",
+    "BankAccount",
+    "BankAccountFactory",
+    "WithdrawFunctionFeeDecorator",
+    "CoreBankAccount",
+    "Function",
+    "BaseChessPieceImpl",
+    "ChessPiece",
+    "Optional",
+    "Pair",
+    "ChessPieceFunctions",
+    "Collection",
+    "ChessPieceFactory",
+    "KnightFunctions",
+    "SimpleChessPieceFunctions",
+    "BiFunction",
+    "GUI",
+    "JFrame",
+    "Map",
+    "JButton",
+    "HashMap",
+    "Logics",
+    "LogicsImpl",
+    "JPanel",
+    "GridLayout",
+    "BorderLayout",
+    "ActionListener",
+    "Entry",
+    "ArrayList",
+    "Random",
+    "IOException",
+    "Main"
+  ],
+  "edges": [
+    {
+      "source": "BankAccountFactory",
+      "target": "BankAccount"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "WithdrawFunctionFeeDecorator"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "OverDraftDecorator"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "CoreBankAccount"
+    },
+    {
+      "source": "BankAccountFactory",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "BaseDecoratorBankAccount",
+      "target": "BankAccount"
+    },
+    {
+      "source": "CoreBankAccount",
+      "target": "BankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "OverDraftDecorator",
+      "target": "BankAccount"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "BaseDecoratorBankAccount"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "Function"
+    },
+    {
+      "source": "WithdrawFunctionFeeDecorator",
+      "target": "BankAccount"
+    },
+    {
+      "source": "BaseChessPieceImpl",
+      "target": "ChessPiece"
+    },
+    {
+      "source": "BaseChessPieceImpl",
+      "target": "Optional"
+    },
+    {
+      "source": "BaseChessPieceImpl",
+      "target": "Pair"
+    },
+    {
+      "source": "BaseChessPieceImpl",
+      "target": "ChessPieceFunctions"
+    },
+    {
+      "source": "BaseChessPieceImpl",
+      "target": "Collection"
+    },
+    {
+      "source": "ChessPiece",
+      "target": "Pair"
+    },
+    {
+      "source": "ChessPiece",
+      "target": "Collection"
+    },
+    {
+      "source": "ChessPieceFactory",
+      "target": "ChessPiece"
+    },
+    {
+      "source": "ChessPieceFactory",
+      "target": "BaseChessPieceImpl"
+    },
+    {
+      "source": "ChessPieceFactory",
+      "target": "KnightFunctions"
+    },
+    {
+      "source": "ChessPieceFactory",
+      "target": "SimpleChessPieceFunctions"
+    },
+    {
+      "source": "ChessPieceFunctions",
+      "target": "BiFunction"
+    },
+    {
+      "source": "ChessPieceFunctions",
+      "target": "Pair"
+    },
+    {
+      "source": "ChessPieceFunctions",
+      "target": "Collection"
+    },
+    {
+      "source": "GUI",
+      "target": "JFrame"
+    },
+    {
+      "source": "GUI",
+      "target": "Map"
+    },
+    {
+      "source": "GUI",
+      "target": "JButton"
+    },
+    {
+      "source": "GUI",
+      "target": "Pair"
+    },
+    {
+      "source": "GUI",
+      "target": "HashMap"
+    },
+    {
+      "source": "GUI",
+      "target": "Logics"
+    },
+    {
+      "source": "GUI",
+      "target": "LogicsImpl"
+    },
+    {
+      "source": "GUI",
+      "target": "JPanel"
+    },
+    {
+      "source": "GUI",
+      "target": "GridLayout"
+    },
+    {
+      "source": "GUI",
+      "target": "ActionListener"
+    },
+    {
+      "source": "GUI",
+      "target": "Entry"
+    },
+    {
+      "source": "KnightFunctions",
+      "target": "ChessPieceFunctions"
+    },
+    {
+      "source": "KnightFunctions",
+      "target": "BiFunction"
+    },
+    {
+      "source": "KnightFunctions",
+      "target": "Pair"
+    },
+    {
+      "source": "KnightFunctions",
+      "target": "Collection"
+    },
+    {
+      "source": "KnightFunctions",
+      "target": "ArrayList"
+    },
+    {
+      "source": "LogicsImpl",
+      "target": "Logics"
+    },
+    {
+      "source": "LogicsImpl",
+      "target": "ChessPiece"
+    },
+    {
+      "source": "LogicsImpl",
+      "target": "ChessPieceFactory"
+    },
+    {
+      "source": "LogicsImpl",
+      "target": "Random"
+    },
+    {
+      "source": "LogicsImpl",
+      "target": "Pair"
+    },
+    {
+      "source": "Main",
+      "target": "GUI"
+    },
+    {
+      "source": "SimpleChessPieceFunctions",
+      "target": "ChessPieceFunctions"
+    },
+    {
+      "source": "SimpleChessPieceFunctions",
+      "target": "Pair"
+    },
+    {
+      "source": "SimpleChessPieceFunctions",
+      "target": "Collection"
+    },
+    {
+      "source": "SimpleChessPieceFunctions",
+      "target": "ArrayList"
+    },
+    {
+      "source": "SimpleChessPieceFunctions",
+      "target": "BiFunction"
+    }
+  ]
+}

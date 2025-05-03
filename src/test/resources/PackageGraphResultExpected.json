@@ -3,7 +3,6 @@
     "OverDraftDecorator",
     "BaseDecoratorBankAccount",
     "BankAccount",
-    "IllegalStateException",
     "BankAccountFactory",
     "WithdrawFunctionFeeDecorator",
     "CoreBankAccount",
@@ -45,10 +44,6 @@
     {
       "source": "OverDraftDecorator",
       "target": "BankAccount"
-    },
-    {
-      "source": "OverDraftDecorator",
-      "target": "IllegalStateException"
     },
     {
       "source": "WithdrawFunctionFeeDecorator",
