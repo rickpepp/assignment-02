@@ -13,6 +13,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -21,6 +22,7 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
     private final Set<String> dependencySet = new java.util.HashSet<String>();
     private final Set<String> genericsSet = new java.util.HashSet<String>();
     private String className = "";
+    private Optional<List<String>> primitiveAndJavaLangList = Optional.empty();
 
     /**
      *  Finding a type in a class/interface declaration 
@@ -82,15 +84,8 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
     }
 
     public Set<String> getSet() {
-        List<String> primitive;
-        try(InputStream in= Thread.currentThread()
-                .getContextClassLoader().getResourceAsStream("ExcludeDependencyFile.json")){
-            ObjectMapper mapper = new ObjectMapper();
-            primitive = mapper.readValue(in, new TypeReference<List<String>>(){});
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
+        if (this.primitiveAndJavaLangList.isEmpty())
+            this.primitiveAndJavaLangList = Optional.of(getPrimitiveAndJavaLangList());
         return dependencySet.stream()
                 .map(e -> e.substring(e.lastIndexOf('.') + 1))
                 .flatMap(e -> {
@@ -108,8 +103,24 @@ public class DependencyVisitor extends VoidVisitorAdapter<Object> {
                 .map(e -> e.replace(" ","")
                         .replace("[","")
                         .replace("]",""))
-                .filter(e -> !primitive.contains(e) && !e.isEmpty() && !this.genericsSet.contains(e) && !e.equals(this.className))
+                .filter(e -> !primitiveAndJavaLangList.get().contains(e) &&
+                        !e.isEmpty() &&
+                        !this.genericsSet.contains(e) &&
+                        !e.equals(this.className))
                 .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private static List<String> getPrimitiveAndJavaLangList() {
+        List<String> primitive;
+        try(InputStream in= Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream("ExcludeDependencyFile.json")){
+            ObjectMapper mapper = new ObjectMapper();
+            primitive = mapper.readValue(in, new TypeReference<>() {});
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }
+        return primitive;
     }
 
     public String getClassName() {

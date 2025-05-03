@@ -77,43 +77,10 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
 
     @Override
     public Promise<ProjectDepsReport> getProjectDependencies(String projectPath) {
-        Vertx vx = Vertx.vertx();
         Promise<ProjectDepsReport> promise = Promise.promise();
         this.getPackageDependencies(projectPath + File.separator + "src" + File.separator + "main" + File.separator + "java").future().onComplete(
                 packageDepsReportAsyncResult -> promise.complete(new ProjectDepsReport(packageDepsReportAsyncResult.result().getDependencies()))
         );
         return promise;
-    }
-}
-
-class main {
-    public static void main(String[] args) {
-        String file = "/home/rick/Documenti/Università/Unibo/Paradigmi e Sviluppo del software/Lab/pps-lab01b/src/main/java/e1/OverDraftDecorator.java";
-        DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
-        lib.getClassDependencies(file)
-                .future().onComplete(result -> {
-            for(DefaultEdge e : result.result().getDependencies().edgeSet()){
-                System.out.println(result.result().getDependencies().getEdgeSource(e) + " --> " + result.result().getDependencies().getEdgeTarget(e));
-            }
-        }).onFailure(result -> {
-            System.out.println(result.toString());
-        });
-        /*DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
-        lib.getPackageDependencies("/home/rick/Documenti/Università/Unibo/Programmazione ad Oggetti/OOP22-puzbob-main/src/main/java/it/unibo/puzbob/controller/")
-                .future().onComplete(result -> {
-                    for(DefaultEdge e : result.result().getDependencies().edgeSet()){
-                        System.out.println(result.result().getDependencies().getEdgeSource(e) + " --> " + result.result().getDependencies().getEdgeTarget(e));
-                    }
-                }).onFailure(result -> {
-                    System.out.println(result.toString());
-                });*/
-        /*DependencyAnalyserLib lib = new DependencyAnalyserLibImpl();
-        lib.getProjectDependencies("/home/rick/Documenti/Università/Unibo/Paradigmi e Sviluppo del software/Lab/pps-lab01b").future().onComplete(result -> {
-            for(DefaultEdge e : result.result().getDependencies().edgeSet()){
-                System.out.println(result.result().getDependencies().getEdgeSource(e) + " --> " + result.result().getDependencies().getEdgeTarget(e));
-            }
-        }).onFailure(result -> {
-            System.out.println(result.toString());
-        });*/
     }
 }
