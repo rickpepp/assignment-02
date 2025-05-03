@@ -1,12 +1,12 @@
-package it.unibo.assignment_02;
+package it.unibo.assignment_02.lib;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
-public class ClassDepsReport {
+public class PackageDepsReport {
     private final Graph<String, DefaultEdge> dependencyGraph;
 
-    public ClassDepsReport(Graph<String, DefaultEdge> dependencyCollection) {
+    public PackageDepsReport(Graph<String, DefaultEdge> dependencyCollection) {
         this.dependencyGraph = dependencyCollection;
     }
 

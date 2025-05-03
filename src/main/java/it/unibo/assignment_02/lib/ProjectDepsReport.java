@@ -1,4 +1,4 @@
-package it.unibo.assignment_02;
+package it.unibo.assignment_02.lib;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
