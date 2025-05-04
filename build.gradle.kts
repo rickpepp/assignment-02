@@ -35,6 +35,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
     implementation("io.reactivex.rxjava3:rxjava:3.1.10")
     implementation("org.graphstream:gs-core:1.3")
+    implementation("commons-io:commons-io:2.19.0")
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 }
