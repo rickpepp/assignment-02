@@ -1,21 +1,18 @@
 package it.unibo.assignment_02.gui_program;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Random;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileSystemView;
-
-import java.util.List;
-import java.util.TimerTask;
-
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GUIDependencies extends JPanel implements Controller {
 
@@ -57,18 +54,16 @@ public class GUIDependencies extends JPanel implements Controller {
 
 
 
-    public void addNode(String nodeName) {
+    public synchronized void addNode(String nodeName) {
         if (graph.getNode(nodeName) == null && !nodeName.isEmpty()){
-            /*Node n = graph.addNode(nodeName);
-            n.setAttribute("ui.label", nodeName);*/
-            counter++;
-            testList.add(nodeName);
-            //this.classCounter.setText("Class counter = " + counter);
+            Node n = graph.addNode(nodeName);
+            n.setAttribute("ui.label", nodeName);
+            this.counter++;
             //System.out.println(counter);
         }
     }
     
-    public void addEdge(String sourceNode, String destinationNode) {
+    public synchronized void addEdge(String sourceNode, String destinationNode) {
         graph.addEdge("Edge" + sourceNode + destinationNode, sourceNode, destinationNode);
     }
 
@@ -79,16 +74,6 @@ public class GUIDependencies extends JPanel implements Controller {
 
     private void selectPathToAnalyze() {
         // Aggiungi un nuovo nodo
-        /*String newNodeName = "Node" + nodeCount++;
-        Node n = graph.addNode(newNodeName);
-        n.setAttribute("ui.label", newNodeName);
-
-        // Aggiungi un arco casuale a un nodo esistente, se ci sono nodi nel grafo
-        if (nodeCount > 1) {
-            int existingNodeIndex = random.nextInt(nodeCount - 1); // Scegli un nodo esistente
-            String existingNodeName = "Node" + existingNodeIndex;
-            graph.addEdge("Edge" + existingNodeIndex + newNodeName, existingNodeName, newNodeName);
-        }*/
         JFileChooser j = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
         // set the selection mode to directories only
@@ -97,11 +82,20 @@ public class GUIDependencies extends JPanel implements Controller {
         int r = j.showOpenDialog(null);
 
         if (r == JFileChooser.APPROVE_OPTION) {
+            counter = 0;
             // set the label to the path of the selected directory
-            this.model.calcDependency(j.getSelectedFile().getAbsolutePath());
+            this.model.calcDependency(j.getSelectedFile().getAbsolutePath()).delay(100, TimeUnit.MILLISECONDS).subscribe(
+                    graph -> {
+                        graph.vertexSet().forEach(this::addNode);
+                        graph.edgeSet().forEach(edge -> this.addEdge(
+                            graph.getEdgeSource(edge), graph.getEdgeTarget(edge)
+                    ));
+                    },
+                    Throwable::printStackTrace
+            );;
         }
 
-
+        this.classCounter.setText("Class counter = " + counter);
     }
 
     public static void main(String[] args) {
