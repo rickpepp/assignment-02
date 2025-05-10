@@ -7,13 +7,17 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import it.unibo.assignment_02.DependencyVisitor;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,10 +41,10 @@ public class DependenciesModel {
             } catch (IOException e) {
                 emitter.onError(e);
             }
-        }).map(filePath -> {
+        }).subscribeOn(Schedulers.io()).map(filePath -> {
             Path path = Paths.get((String) filePath);
 
-            BufferedReader reader = Files.newBufferedReader(path);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(String.valueOf(path)), StandardCharsets.UTF_8));
             String line;
             StringBuilder content = new StringBuilder();
 

@@ -1,9 +1,13 @@
 package it.unibo.assignment_02.gui_program;
 
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
@@ -13,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 
 public class GUIDependencies extends JPanel implements Controller {
 
@@ -84,12 +89,22 @@ public class GUIDependencies extends JPanel implements Controller {
         if (r == JFileChooser.APPROVE_OPTION) {
             counter = 0;
             // set the label to the path of the selected directory
-            this.model.calcDependency(j.getSelectedFile().getAbsolutePath()).delay(100, TimeUnit.MILLISECONDS).subscribe(
-                    graph -> {
-                        graph.vertexSet().forEach(this::addNode);
-                        graph.edgeSet().forEach(edge -> this.addEdge(
-                            graph.getEdgeSource(edge), graph.getEdgeTarget(edge)
-                    ));
+            Flowable<Graph<String, DefaultEdge>> flow = this.model.calcDependency(j.getSelectedFile().getAbsolutePath());
+            flow.buffer(20).subscribe(
+                    graphs -> {
+
+                        //System.out.println(counter);
+                        SwingUtilities.invokeLater(() -> {
+
+                        });
+                        graphs.forEach(graph -> {
+                            this.classCounter.setText("Class count = " + counter);
+                            graph.vertexSet().forEach(this::addNode);
+                            graph.edgeSet().forEach(edge -> this.addEdge(
+                                    graph.getEdgeSource(edge), graph.getEdgeTarget(edge)
+                            ));
+                        });
+
                     },
                     Throwable::printStackTrace
             );;
@@ -101,10 +116,13 @@ public class GUIDependencies extends JPanel implements Controller {
     public static void main(String[] args) {
         System.setProperty("org.graphstream.ui", "swing");
         JFrame frame = new JFrame("Dependency graph");
-        GUIDependencies example = new GUIDependencies();
-        frame.setSize(800, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(example);
-        frame.setVisible(true);
+        SwingUtilities.invokeLater(()->{
+            GUIDependencies example = new GUIDependencies();
+            frame.setSize(800, 600);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.add(example);
+            frame.setVisible(true);
+        });
+
     }
 }
