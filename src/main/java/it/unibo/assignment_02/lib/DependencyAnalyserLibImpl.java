@@ -34,6 +34,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
         }
         Promise<ClassDepsReport> promise = Promise.promise();
         Vertx finalVx = vx;
+        // First read the file then parse it
         vx.fileSystem().readFile(filePath)
                 .onComplete(buffer -> {
                     CompilationUnit cu = StaticJavaParser.parse(buffer.result().toString());
@@ -55,6 +56,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
     public Promise<PackageDepsReport> getPackageDependencies(String packagePath) {
         Vertx vx = Vertx.vertx();
         Promise<PackageDepsReport> promise = Promise.promise();
+        // Search every file .java in the directory
         Promise<Collection<String>> promisResult = (Promise<Collection<String>>) vx.executeBlocking(filePromise -> {
             try (Stream<Path> stream = Files.walk(Paths.get(packagePath))) {
                 filePromise.complete(stream.filter(e -> Files.isRegularFile(e) &&
@@ -63,6 +65,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
                 throw new RuntimeException(e);
             }
         });
+        // Then apply getClassDependencies to every founded file
         promisResult.future().onComplete(e -> {
             CompositeFuture f = Future.all(e.result().stream().map(this::getClassDependencies).map(Promise::future).collect(Collectors.toList()));
             f.onSuccess(compositeFuture -> {
@@ -80,6 +83,7 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
     @Override
     public Promise<ProjectDepsReport> getProjectDependencies(String projectPath) {
         Promise<ProjectDepsReport> promise = Promise.promise();
+        // Apply getPackageDependencies on ./src/main/java directory
         this.getPackageDependencies(projectPath + File.separator + "src" +
                 File.separator + "main" + File.separator + "java").future().onComplete(
                 packageDepsReportAsyncResult ->

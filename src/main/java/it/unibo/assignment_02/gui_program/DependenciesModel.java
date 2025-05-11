@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class DependenciesModel {
-    private Controller controller;
+    private final Controller controller;
     Observable<Graph<String, DefaultEdge>> observable;
 
     public DependenciesModel(Controller controller) {
@@ -35,6 +35,7 @@ public class DependenciesModel {
     public @NonNull Flowable<Graph<String, DefaultEdge>> calcDependency(String srcPath) {
         controller.clear();
         return Observable
+                // Find files
                 .create(emitter -> {
                     try (Stream<Path> stream = Files.walk(Paths.get(srcPath))) {
                         stream.filter(e -> Files.isRegularFile(e) &&
@@ -45,21 +46,22 @@ public class DependenciesModel {
                         emitter.onError(e);
                     }
                 })
+                // Process in background
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.single())
+                // Read file content
                 .map(filePath -> {
                     Path path = Paths.get((String) filePath);
-
                     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(String.valueOf(path)),
                             StandardCharsets.UTF_8));
                     String line;
                     StringBuilder content = new StringBuilder();
-
                     while ((line = reader.readLine()) != null) {
                         content.append(line).append(System.lineSeparator());
                     }
                     return content.toString();
                 })
+                // Parse the file
                 .map(javaPath -> {
                     StaticJavaParser.setConfiguration(new ParserConfiguration()
                             .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21));
@@ -73,6 +75,7 @@ public class DependenciesModel {
                         return new DependencyVisitor();
                     }
                 })
+                // Export the result as a graph
                 .map(dv -> {
                     Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
                     g.addVertex(dv.getClassName());
