@@ -34,26 +34,35 @@ public class DependenciesModel {
 
     public @NonNull Flowable<Graph<String, DefaultEdge>> calcDependency(String srcPath) {
         controller.clear();
-        return Observable.create(emitter -> {
-            try (Stream<Path> stream = Files.walk(Paths.get(srcPath))) {
-                stream.filter(e -> Files.isRegularFile(e) && e.getFileName().toString().endsWith(".java")).map(e -> e.toFile().getAbsolutePath()).forEach(emitter::onNext);
-                emitter.onComplete();
-            } catch (IOException e) {
-                emitter.onError(e);
-            }
-        }).subscribeOn(Schedulers.io()).map(filePath -> {
-            Path path = Paths.get((String) filePath);
+        return Observable
+                .create(emitter -> {
+                    try (Stream<Path> stream = Files.walk(Paths.get(srcPath))) {
+                        stream.filter(e -> Files.isRegularFile(e) &&
+                                e.getFileName().toString().endsWith(".java"))
+                                    .map(e -> e.toFile().getAbsolutePath()).forEach(emitter::onNext);
+                        emitter.onComplete();
+                    } catch (IOException e) {
+                        emitter.onError(e);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.single())
+                .map(filePath -> {
+                    Path path = Paths.get((String) filePath);
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(String.valueOf(path)), StandardCharsets.UTF_8));
-            String line;
-            StringBuilder content = new StringBuilder();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(String.valueOf(path)),
+                            StandardCharsets.UTF_8));
+                    String line;
+                    StringBuilder content = new StringBuilder();
 
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append(System.lineSeparator());
-            }
-            return content.toString();
-        }).map(javaPath -> {
-                    StaticJavaParser.setConfiguration(new ParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21));
+                    while ((line = reader.readLine()) != null) {
+                        content.append(line).append(System.lineSeparator());
+                    }
+                    return content.toString();
+                })
+                .map(javaPath -> {
+                    StaticJavaParser.setConfiguration(new ParserConfiguration()
+                            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21));
                     CompilationUnit cu;
                     try {
                         cu = StaticJavaParser.parse(javaPath);

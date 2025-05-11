@@ -1,7 +1,6 @@
 package it.unibo.assignment_02.gui_program;
 
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.View;
@@ -12,26 +11,22 @@ import org.jgrapht.graph.DefaultEdge;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class GUIDependencies extends JPanel implements Controller {
 
     public SingleGraph graph = new SingleGraph("Dependency Graph");
-    private int counter = 0;
-    private JLabel classCounter; // Contatore per i nomi dei nodi
-    private DependenciesModel model;
+    private int counterClass = 0;
+    private int counterDependence = 0;
+    private final JLabel classAndDependencyCounterLabel;
+    private final DependenciesModel model;
 
-    private List<String> testList = new ArrayList<>();
+    private final String labelClassCounter = "Number of Classes/Interfaces = ";
+    private final String labelDependenciesCounter = "Numbero of Dependencies = ";
 
     public GUIDependencies() {
         this.model = new DependenciesModel(this);
 
-        // Configurazione del grafo iniziale
         graph.setStrict(false);
         graph.setAutoCreate(true);
 
@@ -42,19 +37,12 @@ public class GUIDependencies extends JPanel implements Controller {
         setLayout(new BorderLayout());
         add((Component) view, BorderLayout.CENTER);
 
-        // Pulsante per aggiungere vertici e spigoli
-        JButton addButton = new JButton("Aggiungi Vertice");
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectPathToAnalyze();
-            }
-        });
+        JButton addButton = new JButton("Open folder");
+        addButton.addActionListener(e -> selectPathToAnalyze());
         add(addButton, BorderLayout.SOUTH);
 
-        this.classCounter = new JLabel("Class count = 0");
-        add(this.classCounter, BorderLayout.NORTH);
-
+        this.classAndDependencyCounterLabel = new JLabel(labelClassCounter + " 0 " + labelDependenciesCounter + "0");
+        add(this.classAndDependencyCounterLabel, BorderLayout.NORTH);
     }
 
 
@@ -63,13 +51,13 @@ public class GUIDependencies extends JPanel implements Controller {
         if (graph.getNode(nodeName) == null && !nodeName.isEmpty()){
             Node n = graph.addNode(nodeName);
             n.setAttribute("ui.label", nodeName);
-            this.counter++;
-            //System.out.println(counter);
+            this.counterClass++;
         }
     }
     
     public synchronized void addEdge(String sourceNode, String destinationNode) {
         graph.addEdge("Edge" + sourceNode + destinationNode, sourceNode, destinationNode);
+        this.counterDependence++;
     }
 
     @Override
@@ -78,31 +66,25 @@ public class GUIDependencies extends JPanel implements Controller {
     }
 
     private void selectPathToAnalyze() {
-        // Aggiungi un nuovo nodo
         JFileChooser j = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
-        // set the selection mode to directories only
         j.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         int r = j.showOpenDialog(null);
 
         if (r == JFileChooser.APPROVE_OPTION) {
-            counter = 0;
-            // set the label to the path of the selected directory
+            counterClass = 0;
+            counterDependence = 0;
             Flowable<Graph<String, DefaultEdge>> flow = this.model.calcDependency(j.getSelectedFile().getAbsolutePath());
             flow.buffer(20).subscribe(
                     graphs -> {
-
-                        //System.out.println(counter);
-                        SwingUtilities.invokeLater(() -> {
-
-                        });
                         graphs.forEach(graph -> {
-                            this.classCounter.setText("Class count = " + counter);
                             graph.vertexSet().forEach(this::addNode);
                             graph.edgeSet().forEach(edge -> this.addEdge(
                                     graph.getEdgeSource(edge), graph.getEdgeTarget(edge)
                             ));
+                            this.classAndDependencyCounterLabel.setText(labelClassCounter +
+                                    counterClass + " " + labelDependenciesCounter + counterDependence);
                         });
 
                     },
@@ -110,7 +92,8 @@ public class GUIDependencies extends JPanel implements Controller {
             );;
         }
 
-        this.classCounter.setText("Class counter = " + counter);
+        this.classAndDependencyCounterLabel.setText(labelClassCounter + counterClass +
+                " " + labelDependenciesCounter + counterDependence );
     }
 
     public static void main(String[] args) {

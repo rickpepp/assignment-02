@@ -57,7 +57,8 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
         Promise<PackageDepsReport> promise = Promise.promise();
         Promise<Collection<String>> promisResult = (Promise<Collection<String>>) vx.executeBlocking(filePromise -> {
             try (Stream<Path> stream = Files.walk(Paths.get(packagePath))) {
-                filePromise.complete(stream.filter(e -> Files.isRegularFile(e) && e.getFileName().toString().endsWith(".java")).map(e -> e.toFile().getAbsolutePath()).collect(Collectors.toSet()));
+                filePromise.complete(stream.filter(e -> Files.isRegularFile(e) &&
+                        e.getFileName().toString().endsWith(".java")).map(e -> e.toFile().getAbsolutePath()).collect(Collectors.toSet()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -79,8 +80,10 @@ public class DependencyAnalyserLibImpl implements DependencyAnalyserLib {
     @Override
     public Promise<ProjectDepsReport> getProjectDependencies(String projectPath) {
         Promise<ProjectDepsReport> promise = Promise.promise();
-        this.getPackageDependencies(projectPath + File.separator + "src" + File.separator + "main" + File.separator + "java").future().onComplete(
-                packageDepsReportAsyncResult -> promise.complete(new ProjectDepsReport(packageDepsReportAsyncResult.result().getDependencies()))
+        this.getPackageDependencies(projectPath + File.separator + "src" +
+                File.separator + "main" + File.separator + "java").future().onComplete(
+                packageDepsReportAsyncResult ->
+                        promise.complete(new ProjectDepsReport(packageDepsReportAsyncResult.result().getDependencies()))
         );
         return promise;
     }
